@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>爆炒江湖 · 百味楼 &amp; 厨神大赛配队助手</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --card: #ffffff;
+      --border: #e6dfd5;
+      --primary: #c85a32;
+      --primary-hover: #a94724;
+      --accent: #2e7d5b;
+      --text: #2c241d;
+      --muted: #76695d;
+      --soft: #faf7f2;
+      --danger: #c0392b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    header {
+      background: linear-gradient(135deg, #3c2a1e, #6b3b24);
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    header h1 { margin: 0; font-size: 20px; letter-spacing: 0.5px; }
+    header .sub { font-size: 12px; color: #f0d7c5; margin-top: 2px; }
+    .container { max-width: 1120px; margin: 20px auto; padding: 0 16px 48px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input[type="text"], input[type="number"], select {
+      padding: 8px 12px;
+      border: 1px solid #d5cabd;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    button {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--primary);
+      color: #fff;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    button:hover { background: var(--primary-hover); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button.secondary { background: #ece5dc; color: var(--text); }
+    button.secondary:hover { background: #dfd5c8; }
+    button.green { background: var(--accent); }
+    button.green:hover { background: #236348; }
+    button.danger { background: #f8e3e1; color: var(--danger); }
+    button.danger:hover { background: #f2cbc6; }
+    button.sm { padding: 5px 10px; font-size: 12px; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab {
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: #e9e2d8;
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab.active { background: var(--primary); color: #fff; }
+
+    .account-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+    .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .pill.ok { background: #e6f5ee; border-color: #b7e2ce; color: #1f6b4a; font-weight: 600; }
+    .pill.warn { background: #fff3e0; border-color: #f5d199; color: #9c5b00; font-weight: 600; }
+
+    .grid-2 { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .floor-list { display: flex; flex-direction: column; gap: 6px; max-height: 520px; overflow-y: auto; }
+    .floor-item {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--soft);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .floor-item:hover { border-color: var(--primary); }
+    .floor-item.active { background: #fff4ee; border-color: var(--primary); }
+    .floor-item .fname { font-weight: 700; font-size: 14px; }
+    .floor-item .fmeta { font-size: 12px; color: var(--muted); }
+
+    .chip-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f3ece3;
+      font-size: 13px;
+    }
+    .chip .x { cursor: pointer; color: var(--muted); font-weight: bold; }
+    .chip .x:hover { color: var(--danger); }
+
+    .result-box {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fffdf9;
+      margin-top: 12px;
+    }
+    .score-big { font-size: 24px; font-weight: 800; color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { padding: 7px 8px; border-bottom: 1px solid #eee7dd; text-align: left; }
+    th { color: var(--muted); font-weight: 600; background: var(--soft); }
+    .chef-card {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      margin-top: 6px;
+    }
+    .chef-card .cname { font-weight: 700; color: var(--text); }
+    .chef-card .cskill { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .status-bar {
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #fff8eb;
+      border: 1px solid #f0d7a8;
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .status-bar.show { display: block; }
+    .status-bar.err { background: #fdecea; border-color: #f5c2bd; color: var(--danger); }
+    .suggest-box {
+      position: relative;
+      display: inline-block;
+    }
+    .suggest-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #d5cabd;
+      border-radius: 8px;
+      z-index: 50;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .suggest-item { padding: 7px 10px; font-size: 13px; cursor: pointer; }
+    .suggest-item:hover { background: #fff4ee; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>爆炒江湖 · 百味楼 &amp; 厨神大赛配队助手</h1>
+      <div class="sub">0 误差校准版百味楼引擎 · 支持多账号校验码切换 · 自定义后续新楼层 · 自动拉取当周厨神规则</div>
+    </div>
+    <div class="row">
+      <button class="secondary sm" onclick="refreshOnlineData()">刷新图鉴 &amp; 当周厨神规则</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div id="statusBar" class="status-bar"></div>
+
+    <!-- 账号栏 -->
+    <div class="card">
+      <div class="account-bar">
+        <div class="row">
+          <strong>当前账号校验码：</strong>
+          <select id="savedTokens" onchange="onSelectSavedToken()"></select>
+          <input type="text" id="tokenInput" placeholder="输入新校验码，如 DVMVGD" style="width: 190px; text-transform: uppercase;" />
+          <button onclick="loadAccount(false)">加载账号</button>
+          <button class="secondary" onclick="loadAccount(true)">重新同步存档</button>
+        </div>
+        <div id="accountInfo" class="row"></div>
+      </div>
+    </div>
+
+    <!-- 模式切换 -->
+    <div class="tabs">
+      <div class="tab active" id="tabBwl" onclick="switchTab('bwl')">百味楼配队</div>
+      <div class="tab" id="tabFg" onclick="switchTab('fg')">每周厨神大赛 / 活动关</div>
+    </div>
+
+    <!-- Tab 1: 百味楼 -->
+    <div id="panelBwl">
+      <div class="grid-2">
+        <div class="card">
+          <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+            <strong>已收录楼层</strong>
+            <div class="row">
+              <button class="sm secondary" onclick="openNewFloor()">+ 新增楼层</button>
+              <button class="sm green" onclick="solveAllFloors()">一键全算</button>
+            </div>
+          </div>
+          <div class="row" style="margin-bottom: 10px; font-size: 13px;">
+            <label><input type="checkbox" id="bwlSwapAll" /> 换厨具冲榜（耗时稍长）</label>
+          </div>
+          <div id="floorList" class="floor-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+            <strong id="floorEditorTitle">楼层配置与计算</strong>
+            <div class="row">
+              <button class="sm secondary" onclick="saveCurrentFloor()">保存楼层配置</button>
+              <button class="sm danger" id="btnDelFloor" onclick="deleteCurrentFloor()">删除该层</button>
+            </div>
+          </div>
+
+          <div class="row" style="margin-bottom: 10px;">
+            <label>楼层名 <input type="text" id="flName" style="width: 120px;" /></label>
+            <label>上阵人数 <input type="number" id="flSlots" min="1" max="8" value="5" style="width: 68px;" /></label>
+            <label>目标分 <input type="number" id="flTarget" min="0" value="0" style="width: 105px;" /></label>
+          </div>
+
+          <div style="margin-bottom: 6px; font-size: 13px; color: var(--muted);">本层点单菜谱（支持输入关键词联想添加，也可粘贴逗号分隔的菜名批量添加）：</div>
+          <div id="dishChips" class="chip-wrap"></div>
+
+          <div class="row" style="margin-top: 8px;">
+            <div class="suggest-box" style="flex: 1; min-width: 220px;">
+              <input type="text" id="dishSearch" placeholder="输入菜名搜索添加，或粘贴：菜1,菜2,菜3" style="width: 100%;" oninput="onDishSearchInput()" onkeydown="if(event.key==='Enter') addDishFromInput()" />
+              <div id="suggestList" class="suggest-list"></div>
+            </div>
+            <button class="secondary" onclick="addDishFromInput()">添加菜谱</button>
+          </div>
+
+          <div class="row" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+            <button onclick="solveSingleFloor(false)">计算不换厨具最高分</button>
+            <button class="green" onclick="solveSingleFloor(true)">同时计算换厨具极限分</button>
+          </div>
+
+          <div id="bwlResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: 厨神大赛 -->
+    <div id="panelFg" style="display: none;">
+      <div class="card">
+        <div class="row" style="margin-bottom: 12px;">
+          <strong>选择大赛 / 活动关规则：</strong>
+          <select id="fgRuleSelect" style="min-width: 300px;" onchange="onSelectFgRule()"></select>
+          <label style="font-size: 13px;"><input type="checkbox" id="fgSwapEquips" /> 允许换厨具冲榜</label>
+          <button onclick="solveFoodGod()">开始计算厨神阵容</button>
+        </div>
+        <div id="fgRuleDesc" style="font-size: 13px; color: var(--muted); background: var(--soft); padding: 10px 12px; border-radius: 8px;"></div>
+        <div id="fgResult"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+let STATE = {
+  token: '',
+  tokens: [],
+  floors: [],
+  rules: [],
+  recipes: [],
+  currentFloorId: null,
+  currentDishes: [],
+};
+
+function showStatus(msg, isErr = false) {
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.className = 'status-bar show' + (isErr ? ' err' : '');
+}
+function hideStatus() {
+  document.getElementById('statusBar').className = 'status-bar';
+}
+
+async function api(path, body = null) {
+  const opts = body ? {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  } : { method: 'GET' };
+  const r = await fetch(path, opts);
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.error || '请求失败');
+  return data;
+}
+
+function switchTab(tab) {
+  document.getElementById('tabBwl').className = 'tab' + (tab === 'bwl' ? ' active' : '');
+  document.getElementById('tabFg').className = 'tab' + (tab === 'fg' ? ' active' : '');
+  document.getElementById('panelBwl').style.display = tab === 'bwl' ? '' : 'none';
+  document.getElementById('panelFg').style.display = tab === 'fg' ? '' : 'none';
+}
+
+function renderTokens() {
+  const sel = document.getElementById('savedTokens');
+  sel.innerHTML = '';
+  if (!STATE.tokens.length) {
+    sel.innerHTML = '<option value="">暂无已缓存账号</option>';
+    return;
+  }
+  for (const t of STATE.tokens) {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    if (t === STATE.token) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function onSelectSavedToken() {
+  const t = document.getElementById('savedTokens').value;
+  if (t) {
+    document.getElementById('tokenInput').value = t;
+    loadAccount(false);
+  }
+}
+
+async function loadAccount(refresh) {
+  const tok = document.getElementById('tokenInput').value.trim().toUpperCase();
+  if (!tok) return showStatus('请先输入白菜菊花校验码！', true);
+  showStatus(refresh ? `正在从官方接口重新同步 [${tok}] 存档...` : `正在加载账号 [${tok}]...`);
+  try {
+    const res = await api('/api/account', { token: tok, refresh });
+    STATE.token = res.account.token;
+    STATE.tokens = res.tokens;
+    renderTokens();
+    const a = res.account;
+    document.getElementById('accountInfo').innerHTML = `
+      <span class="pill ok">已加载：${a.token}</span>
+      <span class="pill">厨师 ${a.chefs_got}（修炼 ${a.chefs_ult}）</span>
+      <span class="pill">菜谱 ${a.recipes_got}（专精 ${a.recipes_ex}）</span>
+      <span class="pill">装修 +${a.deco_buff}%</span>
+    `;
+    hideStatus();
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+async function refreshOnlineData() {
+  showStatus('正在从白菜菊花服务器拉取最新图鉴库与当周厨神规则...');
+  try {
+    const res = await api('/api/refresh_data', {});
+    STATE.rules = res.rules;
+    renderFgRules();
+    showStatus(`刷新完成！图鉴共 ${res.info.recipes_total} 道菜、${res.info.chefs_total} 位厨师、${res.info.rules_count} 条活动/大赛规则。`);
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+function renderFloors() {
+  const box = document.getElementById('floorList');
+  box.innerHTML = '';
+  for (const fl of STATE.floors) {
+    const div = document.createElement('div');
+    div.className = 'floor-item' + (fl.id === STATE.currentFloorId ? ' active' : '');
+    div.innerHTML = `
+      <div>
+        <div class="fname">${fl.name}</div>
+        <div class="fmeta">${fl.slots}人位 · ${fl.dishes.length}道菜 · 目标 ${fl.target.toLocaleString()}</div>
+      </div>
+      <span class="pill">选择</span>
+    `;
+    div.onclick = () => selectFloor(fl.id);
+    box.appendChild(div);
+  }
+}
+
+function selectFloor(fid) {
+  const fl = STATE.floors.find(x => x.id === fid);
+  if (!fl) return;
+  STATE.currentFloorId = fl.id;
+  STATE.currentDishes = [...fl.dishes];
+  document.getElementById('floorEditorTitle').textContent = `当前编辑：${fl.name}`;
+  document.getElementById('flName').value = fl.name;
+  document.getElementById('flSlots').value = fl.slots;
+  document.getElementById('flTarget').value = fl.target;
+  document.getElementById('btnDelFloor').style.display = '';
+  document.getElementById('bwlResult').innerHTML = '';
+  renderFloors();
+  renderDishChips();
+}
+
+function openNewFloor() {
+  const nextNum = STATE.floors.length + 1;
+  STATE.currentFloorId = null;
+  STATE.currentDishes = [];
+  document.getElementById('floorEditorTitle').textContent = '新增楼层';
+  document.getElementById('flName').value = `第 ${nextNum} 层`;
+  document.getElementById('flSlots').value = 5;
+  document.getElementById('flTarget').value = 80000;
+  document.getElementById('btnDelFloor').style.display = 'none';
+  document.getElementById('bwlResult').innerHTML = '';
+  renderFloors();
+  renderDishChips();
+}
+
+function renderDishChips() {
+  const box = document.getElementById('dishChips');
+  box.innerHTML = '';
+  if (!STATE.currentDishes.length) {
+    box.innerHTML = '<span style="font-size:12px;color:#999;">暂未添加菜谱</span>';
+    return;
+  }
+  STATE.currentDishes.forEach((d, idx) => {
+    const sp = document.createElement('span');
+    sp.className = 'chip';
+    sp.innerHTML = `${d} <span class="x" onclick="removeDish(${idx})">×</span>`;
+    box.appendChild(sp);
+  });
+}
+
+function removeDish(idx) {
+  STATE.currentDishes.splice(idx, 1);
+  renderDishChips();
+}
+
+function onDishSearchInput() {
+  const q = document.getElementById('dishSearch').value.trim();
+  const list = document.getElementById('suggestList');
+  if (!q || q.includes(',') || q.includes('，')) {
+    list.style.display = 'none';
+    return;
+  }
+  const matches = STATE.recipes.filter(r => r.name.includes(q)).slice(0, 12);
+  if (!matches.length) {
+    list.style.display = 'none';
+    return;
+  }
+  list.innerHTML = '';
+  for (const m of matches) {
+    const div = document.createElement('div');
+    div.className = 'suggest-item';
+    div.textContent = `${m.name}（${m.rarity}火 · 底价${m.price}）`;
+    div.onclick = () => {
+      STATE.currentDishes.push(m.name);
+      document.getElementById('dishSearch').value = '';
+      list.style.display = 'none';
+      renderDishChips();
+    };
+    list.appendChild(div);
+  }
+  list.style.display = 'block';
+}
+
+function addDishFromInput() {
+  const raw = document.getElementById('dishSearch').value.trim();
+  if (!raw) return;
+  const parts = raw.split(/[,，、\s]+/).map(s => s.trim()).filter(Boolean);
+  for (const p of parts) STATE.currentDishes.push(p);
+  document.getElementById('dishSearch').value = '';
+  document.getElementById('suggestList').style.display = 'none';
+  renderDishChips();
+}
+
+async function saveCurrentFloor() {
+  const floor = {
+    id: STATE.currentFloorId,
+    name: document.getElementById('flName').value.trim(),
+    slots: Number(document.getElementById('flSlots').value),
+    target: Number(document.getElementById('flTarget').value),
+    dishes: STATE.currentDishes,
+  };
+  try {
+    const res = await api('/api/floors/save', { floor });
+    STATE.floors = res.floors;
+    const saved = STATE.currentFloorId
+      ? STATE.floors.find(x => x.id === STATE.currentFloorId)
+      : STATE.floors[STATE.floors.length - 1];
+    selectFloor(saved.id);
+    showStatus(`已保存「${saved.name}」！`);
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+async function deleteCurrentFloor() {
+  if (STATE.currentFloorId == null) return;
+  if (!confirm('确认删除当前楼层配置吗？')) return;
+  try {
+    const res = await api('/api/floors/delete', { id: STATE.currentFloorId });
+    STATE.floors = res.floors;
+    if (STATE.floors.length) selectFloor(STATE.floors[0].id);
+    else openNewFloor();
+    showStatus('已删除该楼层。');
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+function renderBwlPlanHtml(title, data) {
+  const poolStr = Object.entries(data.pool).map(([k, v]) => `${k}${v}`).join(' · ');
+  const badge = data.passed
+    ? `<span class="pill ok">稳过（超出 +${(data.score - data.target).toLocaleString()}）</span>`
+    : `<span class="pill warn">差 ${(data.target - data.score).toLocaleString()} 分</span>`;
+
+  const chefsHtml = data.chefs.map(c => `
+    <div class="chef-card">
+      <div class="cname">[位置 ${c.pos}] ${c.name}（${c.rarity}火） · 厨具：${c.equip}</div>
+      <div class="cskill">${c.skills_desc || '无'}</div>
+    </div>
+  `).join('');
+
+  const rowsHtml = data.dishes.map(d => `
+    <tr>
+      <td>${d.recipe}（${d.rarity}火）</td>
+      <td>${d.grade} (${d.ratio}倍)</td>
+      <td>${d.base}</td>
+      <td>+${d.basic_pct}%</td>
+      <td>${d.total_buff}%</td>
+      <td><strong>${d.score.toLocaleString()}</strong></td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="result-box">
+      <div class="row" style="justify-content: space-between;">
+        <div><strong>${title}</strong> ${badge}</div>
+        <div class="score-big">${data.score.toLocaleString()} 分</div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">合并总属性池：${poolStr}</div>
+      ${chefsHtml}
+      <table>
+        <thead><tr><th>菜谱</th><th>品级</th><th>底价</th><th>基础售价</th><th>总倍率</th><th>得分</th></tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function solveSingleFloor(swapEquips) {
+  if (!STATE.token) return showStatus('请先加载账号校验码！', true);
+  if (!STATE.currentDishes.length) return showStatus('请先添加至少一道菜谱！', true);
+  const name = document.getElementById('flName').value.trim();
+  const slots = Number(document.getElementById('flSlots').value);
+  const target = Number(document.getElementById('flTarget').value);
+  showStatus(`正在为账号 [${STATE.token}] 计算「${name}」最优搭配（${swapEquips ? '含换厨具' : '不换厨具'}），请稍候几秒...`);
+  try {
+    const res = await api('/api/solve/baiweilou', {
+      token: STATE.token,
+      dishes: STATE.currentDishes,
+      slots,
+      target,
+      swap_equips: swapEquips,
+    });
+    let html = renderBwlPlanHtml(`${name} · 不换厨具最高分`, res.result.no_swap);
+    if (res.result.with_swap) {
+      html += renderBwlPlanHtml(`${name} · 换厨具极限分`, res.result.with_swap);
+    }
+    document.getElementById('bwlResult').innerHTML = html;
+    hideStatus();
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+async function solveAllFloors() {
+  if (!STATE.token) return showStatus('请先加载账号校验码！', true);
+  const swapEquips = document.getElementById('bwlSwapAll').checked;
+  showStatus(`正在为账号 [${STATE.token}] 批量计算全部 ${STATE.floors.length} 层（${swapEquips ? '换厨具' : '不换厨具'}），约需 15~40 秒...`);
+  try {
+    const res = await api('/api/solve/baiweilou_all', { token: STATE.token, swap_equips: swapEquips });
+    let html = `
+      <div class="result-box" style="background:#f1f9f5;border-color:#b7e2ce;">
+        <div class="row" style="justify-content:space-between;">
+          <strong>账号 [${STATE.token}] 全 ${res.floors.length} 层汇总（${swapEquips ? '换厨具极限版' : '不换厨具版'}）</strong>
+          <div class="score-big" style="color:var(--accent);">累计总分：${res.total_score.toLocaleString()}</div>
+        </div>
+      </div>
+    `;
+    for (const item of res.floors) {
+      const r = item.result;
+      const chefList = r.chefs.map(c => `${c.name}${c.equip !== '无' ? `[${c.equip}]` : ''}`).join(' + ');
+      const okTag = r.passed ? '<span class="pill ok">稳过</span>' : '<span class="pill warn">未过线</span>';
+      html += `
+        <div class="chef-card" style="margin-top:8px;">
+          <div class="row" style="justify-content:space-between;">
+            <div><strong>${item.name}</strong>（${item.slots}人位 · 目标 ${r.target.toLocaleString()}） ${okTag}</div>
+            <strong style="color:var(--primary);font-size:16px;">${r.score.toLocaleString()} 分</strong>
+          </div>
+          <div class="cskill" style="color:var(--text);margin-top:4px;">上阵：${chefList}</div>
+        </div>
+      `;
+    }
+    document.getElementById('bwlResult').innerHTML = html;
+    hideStatus();
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+function renderFgRules() {
+  const sel = document.getElementById('fgRuleSelect');
+  sel.innerHTML = '';
+  for (const r of STATE.rules) {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = r.title;
+    sel.appendChild(opt);
+  }
+  onSelectFgRule();
+}
+
+function onSelectFgRule() {
+  const rid = Number(document.getElementById('fgRuleSelect').value);
+  const r = STATE.rules.find(x => x.id === rid);
+  if (!r) return;
+  const pl = r.pass_line && r.pass_line.length ? `｜分数线：${r.pass_line.map(x => x.toLocaleString()).join(' / ')}` : '';
+  document.getElementById('fgRuleDesc').textContent = `${r.message || '无说明'} ${pl}（${r.start_time} ~ ${r.end_time}）`;
+}
+
+async function solveFoodGod() {
+  if (!STATE.token) return showStatus('请先加载账号校验码！', true);
+  const ruleId = Number(document.getElementById('fgRuleSelect').value);
+  const swapEquips = document.getElementById('fgSwapEquips').checked;
+  showStatus(`正在为账号 [${STATE.token}] 求解厨神大赛最优阵容，请稍候 10~20 秒...`);
+  try {
+    const res = await api('/api/solve/foodgod', {
+      token: STATE.token,
+      rule_id: ruleId,
+      swap_equips: swapEquips,
+    });
+    const d = res.result;
+    let html = `
+      <div class="result-box">
+        <div class="row" style="justify-content:space-between;">
+          <div><strong>${d.rule_title}</strong> <span class="pill ok">${d.tier}</span></div>
+          <div class="score-big">${d.score.toLocaleString()} 分</div>
+        </div>
+    `;
+    for (const g of d.groups) {
+      const rows = g.dishes.map(x => `
+        <tr>
+          <td>${x.recipe}（${x.rarity}火/${x.ex ? '专精' : '未专'}/${x.grade}）</td>
+          <td>${x.cnt} / ${x.max_lim}</td>
+          <td>${x.unit_price.toLocaleString()}</td>
+          <td>${x.rule_mult ? (x.rule_mult > 0 ? '+' : '') + x.rule_mult + '倍' : '无'}</td>
+          <td><strong>${x.score.toLocaleString()}</strong></td>
+        </tr>
+      `).join('');
+      html += `
+        <div class="chef-card" style="margin-top:10px;">
+          <div class="row" style="justify-content:space-between;">
+            <div class="cname">[位置 ${g.pos}] ${g.chef} · 厨具：${g.equip}</div>
+            <strong>小计 ${g.subtotal.toLocaleString()}</strong>
+          </div>
+          <table>
+            <thead><tr><th>菜谱</th><th>份数</th><th>单价</th><th>规则倍数</th><th>得分</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+    html += '</div>';
+    document.getElementById('fgResult').innerHTML = html;
+    hideStatus();
+  } catch (e) {
+    showStatus(e.message, true);
+  }
+}
+
+async function init() {
+  try {
+    const data = await api('/api/init');
+    STATE.tokens = data.tokens;
+    STATE.floors = data.floors;
+    STATE.rules = data.rules;
+    STATE.recipes = data.recipes;
+    renderTokens();
+    renderFloors();
+    renderFgRules();
+    if (STATE.floors.length) selectFloor(STATE.floors[0].id);
+    if (STATE.tokens.length) {
+      document.getElementById('tokenInput').value = STATE.tokens[0];
+      await loadAccount(false);
+    }
+  } catch (e) {
+    showStatus('初始化失败：' + e.message, true);
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.suggest-box')) {
+    document.getElementById('suggestList').style.display = 'none';
+  }
+});
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# 个人游戏截图与隐私存档（严禁上传）
+*.png
+*.PNG
+*.jpg
+*.jpeg
+*.webp
+*.bmp
+data/user_*.json
+data/h5_js/
+
+# 自动联网拉取的大型缓存文件（首次启动会自动下载）
+data/data.min.json
+data/foodgod_rule.json
+data/etc_rule.json
+
+# Python & PyInstaller 构建产物
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.spec
+.venv/
+venv/
